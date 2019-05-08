@@ -57,3 +57,28 @@ server.post('/api/login', (req, res) => {
         }
     })
 })
+
+server.get('/api/users', restricted, (req, res) => {
+    db('users')
+    .select()
+    .then(users => {
+        res.status(201).json(users)
+    })
+    .catch(err => res.json(err))
+})
+
+function restricted(req, res, next) {
+    const token = req.headers.authorization
+
+    if(token) {
+        jwt.verify(token, secret, (err) => {
+            if(err) {
+                res.status(401).send('You shall not pass')
+            } else {
+                next()
+            }
+        })
+    } else {
+        res.status(401).send('Please provide credentials')
+    }
+}
